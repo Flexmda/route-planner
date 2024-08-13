@@ -8,8 +8,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: -3.745,
-  lng: -38.523
+  lat: -0.025089, // Coordenadas del Colegio de Liga
+  lng: -78.446228
 };
 
 // Tu clave de API
@@ -34,6 +34,11 @@ const MapComponent = ({ morningAddresses, eveningAddresses }) => {
   const [showMorningRoutes, setShowMorningRoutes] = useState(true);
   const [markers, setMarkers] = useState([]);
 
+  const colegioDeLiga = {
+    lat: -0.025089,
+    lng: -78.446228
+  };
+
   const fetchMarkers = async () => {
     try {
       const addressesToGeocode = showMorningRoutes ? morningAddresses : eveningAddresses;
@@ -47,16 +52,48 @@ const MapComponent = ({ morningAddresses, eveningAddresses }) => {
     }
   };
 
+  const calculateRoute = async () => {
+    const origin = showMorningRoutes ? colegioDeLiga : { lat: -0.025089, lng: -78.446228 };
+    const destination = showMorningRoutes ? { lat: -0.025089, lng: -78.446228 } : colegioDeLiga;
+    const waypoints = await Promise.all((showMorningRoutes ? morningAddresses : eveningAddresses).map(async (address) => {
+      const { lat, lng } = await geocodeAddress(address);
+      return { location: { lat, lng }, stopover: true };
+    }));
+
+    const directionsService = new window.google.maps.DirectionsService();
+    directionsService.route(
+      {
+        origin,
+        destination,
+        waypoints,
+        optimizeWaypoints: true,
+        travelMode: window.google.maps.TravelMode.DRIVING
+      },
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK) {
+          setDirectionsResponse(result);
+        } else {
+          console.error(`Directions request failed due to ${status}`);
+        }
+      }
+    );
+  };
+
   useEffect(() => {
     if (map) {
       fetchMarkers();
+      calculateRoute();
     }
   }, [map, showMorningRoutes]);
 
   return (
     <div>
       <label className="switch">
-        <input type="checkbox" checked={showMorningRoutes} onChange={() => setShowMorningRoutes(!showMorningRoutes)} />
+        <input
+          type="checkbox"
+          checked={showMorningRoutes}
+          onChange={() => setShowMorningRoutes(!showMorningRoutes)}
+        />
         <span className="slider"></span>
       </label>
       <LoadScript
@@ -66,8 +103,8 @@ const MapComponent = ({ morningAddresses, eveningAddresses }) => {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={center}
-          zoom={10}
-          onLoad={map => setMap(map)}
+          zoom={12}
+          onLoad={mapInstance => setMap(mapInstance)}
         >
           {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
           {markers.map((marker, index) => (
@@ -77,10 +114,15 @@ const MapComponent = ({ morningAddresses, eveningAddresses }) => {
               label={marker.label}
             />
           ))}
+          <Marker
+            position={colegioDeLiga}
+            label="Colegio de Liga"
+            icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+          />
         </GoogleMap>
       </LoadScript>
     </div>
   );
-}
+};
 
 export default MapComponent;
