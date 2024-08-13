@@ -18,6 +18,7 @@ const MapComponent = () => {
   return (
     <LoadScript
       googleMapsApiKey="AIzaSyDcSZ2P9SYCjQeQxEmbY2VfiJIO2bUII6s" // Tu clave API aquí
+      id="script-loader"
     >
       <GoogleMap
         mapContainerStyle={containerStyle}
