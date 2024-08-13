@@ -1,5 +1,3 @@
-// src/EstudiantesList.js
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +8,9 @@ const EstudiantesList = ({ students }) => {
       <ul>
         {students.map(student => (
           <li key={student.id}>
-            <Link to={`/student/${student.id}`}>{student.nombre}</Link>
+            <Link to={`/student/${student.id}`}>
+              {student.nombre} - {student.sector} {/* Muestra el sector aquí */}
+            </Link>
           </li>
         ))}
       </ul>

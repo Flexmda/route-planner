@@ -1,11 +1,9 @@
-// src/App.js
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import StudentDetails from './StudentDetails';
+import { addEstudiante, getEstudiantes } from './EstudiantesService'; // Importa las funciones de servicio
 import MapComponent from './MapComponent';
-import { addEstudiante, getEstudiantes } from './EstudiantesService';
 import EstudiantesList from './EstudiantesList';
 
 function App() {
@@ -13,6 +11,7 @@ function App() {
   const [direccionManana, setDireccionManana] = useState('');
   const [horarioTarde, setHorarioTarde] = useState('');
   const [direccionTarde, setDireccionTarde] = useState('');
+  const [sector, setSector] = useState(''); // Nuevo estado para el sector
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
@@ -25,13 +24,15 @@ function App() {
   }, []);
 
   const handleAddEstudiante = async () => {
-    await addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde);
+    await addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde, sector);
     setNombre('');
     setDireccionManana('');
     setHorarioTarde('');
     setDireccionTarde('');
-    const estudiantes = await getEstudiantes(); // Actualiza la lista después de agregar un estudiante
-    setStudents(estudiantes);
+    setSector(''); // Limpiar el campo sector
+    // Actualiza la lista de estudiantes después de agregar uno nuevo
+    const updatedStudents = await getEstudiantes();
+    setStudents(updatedStudents);
   };
 
   return (
@@ -61,6 +62,11 @@ function App() {
             value={direccionTarde} 
             onChange={(e) => setDireccionTarde(e.target.value)} 
             placeholder="Dirección Tarde" 
+          />
+          <input 
+            value={sector} 
+            onChange={(e) => setSector(e.target.value)} 
+            placeholder="Sector" 
           />
           <button onClick={handleAddEstudiante}>Agregar Estudiante</button>
 
