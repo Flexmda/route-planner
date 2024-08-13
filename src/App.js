@@ -23,8 +23,11 @@ function App() {
     fetchStudents();
   }, []);
 
-  const handleAddEstudiante = () => {
-    addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde);
+  const handleAddEstudiante = async () => {
+    await addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde);
+    // Actualizar la lista de estudiantes después de agregar uno nuevo
+    const estudiantes = await getEstudiantes();
+    setStudents(estudiantes);
     setNombre('');
     setDireccionManana('');
     setHorarioTarde('');
@@ -32,8 +35,8 @@ function App() {
   };
 
   // Extraer las direcciones de la mañana y tarde
-  const morningRoutes = students.map(student => student.direccionManana);
-  const eveningRoutes = students.map(student => student.direccionTarde);
+  const morningRoutes = students.map(student => student.direccionManana).filter(Boolean);
+  const eveningRoutes = students.map(student => student.direccionTarde).filter(Boolean);
 
   return (
     <Router>
