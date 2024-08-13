@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import StudentDetails from './StudentDetails';
-import { addEstudiante, getEstudiantes } from './EstudiantesService'; // Importa las funciones de servicio
 import MapComponent from './MapComponent';
+import { addEstudiante, getEstudiantes } from './EstudiantesService'; // Asegúrate de tener estas funciones en tu servicio
 import EstudiantesList from './EstudiantesList';
 
 function App() {
@@ -11,7 +11,6 @@ function App() {
   const [direccionManana, setDireccionManana] = useState('');
   const [horarioTarde, setHorarioTarde] = useState('');
   const [direccionTarde, setDireccionTarde] = useState('');
-  const [sector, setSector] = useState(''); // Nuevo estado para el sector
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
@@ -23,17 +22,17 @@ function App() {
     fetchStudents();
   }, []);
 
-  const handleAddEstudiante = async () => {
-    await addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde, sector);
+  const handleAddEstudiante = () => {
+    addEstudiante(nombre, direccionManana, horarioTarde, direccionTarde);
     setNombre('');
     setDireccionManana('');
     setHorarioTarde('');
     setDireccionTarde('');
-    setSector(''); // Limpiar el campo sector
-    // Actualiza la lista de estudiantes después de agregar uno nuevo
-    const updatedStudents = await getEstudiantes();
-    setStudents(updatedStudents);
   };
+
+  // Extraer las direcciones de la mañana y tarde
+  const morningRoutes = students.map(student => student.direccionManana);
+  const eveningRoutes = students.map(student => student.direccionTarde);
 
   return (
     <Router>
@@ -41,7 +40,7 @@ function App() {
         <Sidebar students={students} />
         <div style={{ marginLeft: '250px', padding: '20px', width: '100%' }}>
           <h1>Route Planner</h1>
-          <MapComponent />
+          <MapComponent morningRoutes={morningRoutes} eveningRoutes={eveningRoutes} />
           <h2>Agregar Estudiante</h2>
           <input 
             value={nombre} 
@@ -62,11 +61,6 @@ function App() {
             value={direccionTarde} 
             onChange={(e) => setDireccionTarde(e.target.value)} 
             placeholder="Dirección Tarde" 
-          />
-          <input 
-            value={sector} 
-            onChange={(e) => setSector(e.target.value)} 
-            placeholder="Sector" 
           />
           <button onClick={handleAddEstudiante}>Agregar Estudiante</button>
 
