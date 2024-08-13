@@ -9,7 +9,7 @@ const EstudiantesList = ({ students }) => {
         {students.map(student => (
           <li key={student.id}>
             <Link to={`/student/${student.id}`}>
-              {student.nombre} - {student.sector} {/* Muestra el sector aquí */}
+              {student.nombre} - {student.sector} - {student.direccionManana} - {student.horarioTarde} - {student.direccionTarde}
             </Link>
           </li>
         ))}
