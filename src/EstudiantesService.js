@@ -1,17 +1,29 @@
 // src/EstudiantesService.js
-import { collection, addDoc } from "firebase/firestore";
-import { db } from './firebaseConfig';
 
+import { firestore } from './firebase';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+
+// Agrega un estudiante a la colección 'students'
 export const addEstudiante = async (nombre, direccionManana, horarioTarde, direccionTarde) => {
   try {
-    const docRef = await addDoc(collection(db, "estudiantes"), {
-      nombre: nombre,
-      direccionManana: direccionManana,
-      horarioTarde: horarioTarde,
-      direccionTarde: direccionTarde
+    await addDoc(collection(firestore, 'students'), {
+      nombre,
+      direccionManana,
+      horarioTarde,
+      direccionTarde
     });
-    console.log("Estudiante añadido con ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error al añadir estudiante: ", e);
+  } catch (error) {
+    console.error('Error adding document: ', error);
+  }
+};
+
+// Obtiene todos los estudiantes de la colección 'students'
+export const getEstudiantes = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(firestore, 'students'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error fetching students: ', error);
+    return [];
   }
 };
