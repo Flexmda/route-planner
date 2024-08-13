@@ -1,19 +1,33 @@
 // src/Sidebar.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import './Sidebar.css'; // Asegúrate de tener este archivo para los estilos del sidebar
 
-const Sidebar = ({ students }) => {
+const Sidebar = ({ isOpen, onClose, students }) => {
+  const [isStudentsOpen, setIsStudentsOpen] = useState(false);
+
+  const handleToggleStudents = () => {
+    setIsStudentsOpen(!isStudentsOpen);
+  };
+
   return (
-    <div style={{ width: '250px', padding: '20px', borderRight: '1px solid #ddd' }}>
+    <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <button className="close-btn" onClick={onClose}>X</button>
       <h2>Panel Lateral</h2>
       <ul>
-        <li><Link to="/estudiantes">Estudiantes</Link></li>
-        {students.map(student => (
-          <li key={student.id}>
-            <Link to={`/student/${student.id}`}>{student.nombre}</Link>
-          </li>
-        ))}
+        <li>
+          <button className="collapsible" onClick={handleToggleStudents}>
+            Estudiantes {isStudentsOpen ? '▲' : '▼'}
+          </button>
+          <ul className={`collapsible-content ${isStudentsOpen ? 'show' : ''}`}>
+            {students.map(student => (
+              <li key={student.id}>
+                <Link to={`/student/${student.id}`}>{student.nombre}</Link>
+              </li>
+            ))}
+          </ul>
+        </li>
       </ul>
     </div>
   );
