@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { GoogleMap, LoadScript, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, DirectionsRenderer, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -14,6 +14,7 @@ const center = {
 const MapComponent = ({ morningRoutes, eveningRoutes }) => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [showMorningRoutes, setShowMorningRoutes] = useState(true);
+  const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
     // Verificar si el objeto `google` está disponible
@@ -47,13 +48,18 @@ const MapComponent = ({ morningRoutes, eveningRoutes }) => {
             }
           }
         );
+
+        // Set markers
+        setMarkers(routes.map((route, index) => ({
+          position: route,
+          label: (index + 1).toString()
+        })));
       }
     };
 
     if (window.google && window.google.maps) {
       calculateRoute();
     } else {
-      // Manejo del caso cuando la API de Google Maps no se ha cargado aún
       console.error('Google Maps API is not loaded');
     }
   }, [morningRoutes, eveningRoutes, showMorningRoutes]);
@@ -69,20 +75,28 @@ const MapComponent = ({ morningRoutes, eveningRoutes }) => {
       onLoad={onLoad}
     >
       <div>
-        <label>
+        <label className="switch">
           <input
             type="checkbox"
             checked={showMorningRoutes}
             onChange={() => setShowMorningRoutes(!showMorningRoutes)}
           />
-          {showMorningRoutes ? 'Rutas de Mañana' : 'Rutas de Tarde'}
+          <span className="slider"></span>
         </label>
+        <span>{showMorningRoutes ? 'Rutas de Mañana' : 'Rutas de Tarde'}</span>
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={center}
           zoom={10}
         >
           {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
+          {markers.map((marker, index) => (
+            <Marker
+              key={index}
+              position={marker.position}
+              label={marker.label}
+            />
+          ))}
         </GoogleMap>
       </div>
     </LoadScript>
