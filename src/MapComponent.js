@@ -15,54 +15,77 @@ const MapComponent = ({ morningRoutes, eveningRoutes }) => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [showMorningRoutes, setShowMorningRoutes] = useState(true);
   const [markers, setMarkers] = useState([]);
+  const [geocoder, setGeocoder] = useState(null);
 
   useEffect(() => {
-    // Verificar si el objeto `google` está disponible
-    console.log('Google object:', window.google);
-
-    const calculateRoute = () => {
-      const routes = showMorningRoutes ? morningRoutes : eveningRoutes;
-
-      if (routes.length > 0) {
-        const origin = routes[0];
-        const destination = routes[routes.length - 1];
-        const waypoints = routes.slice(1, -1).map(route => ({
-          location: route,
-          stopover: true
-        }));
-
-        const directionsService = new window.google.maps.DirectionsService();
-
-        directionsService.route(
-          {
-            origin: origin,
-            destination: destination,
-            waypoints: waypoints,
-            travelMode: window.google.maps.TravelMode.DRIVING
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              setDirectionsResponse(result);
-            } else {
-              console.error(`Error fetching directions: ${result}`);
-            }
-          }
-        );
-
-        // Set markers
-        setMarkers(routes.map((route, index) => ({
-          position: route,
-          label: (index + 1).toString()
-        })));
+    const loadGeocoder = () => {
+      if (window.google && window.google.maps) {
+        setGeocoder(new window.google.maps.Geocoder());
       }
     };
 
-    if (window.google && window.google.maps) {
+    loadGeocoder();
+  }, []);
+
+  useEffect(() => {
+    const calculateRoute = async () => {
+      const routes = showMorningRoutes ? morningRoutes : eveningRoutes;
+
+      if (routes.length > 0 && geocoder) {
+        const geocodePromises = routes.map(route => 
+          new Promise((resolve, reject) => {
+            geocoder.geocode({ address: route }, (results, status) => {
+              if (status === 'OK') {
+                resolve(results[0].geometry.location);
+              } else {
+                reject(`Geocode was not successful for the following reason: ${status}`);
+              }
+            });
+          })
+        );
+
+        try {
+          const locations = await Promise.all(geocodePromises);
+          const origin = locations[0];
+          const destination = locations[locations.length - 1];
+          const waypoints = locations.slice(1, -1).map(location => ({
+            location,
+            stopover: true
+          }));
+
+          const directionsService = new window.google.maps.DirectionsService();
+
+          directionsService.route(
+            {
+              origin: origin,
+              destination: destination,
+              waypoints: waypoints,
+              travelMode: window.google.maps.TravelMode.DRIVING
+            },
+            (result, status) => {
+              if (status === window.google.maps.DirectionsStatus.OK) {
+                setDirectionsResponse(result);
+              } else {
+                console.error(`Error fetching directions: ${result}`);
+              }
+            }
+          );
+
+          // Set markers
+          setMarkers(locations.map((location, index) => ({
+            position: location,
+            label: (index + 1).toString()
+          })));
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    if (geocoder) {
       calculateRoute();
-    } else {
-      console.error('Google Maps API is not loaded');
     }
-  }, [morningRoutes, eveningRoutes, showMorningRoutes]);
+  }, [morningRoutes, eveningRoutes, showMorningRoutes, geocoder]);
 
   const onLoad = (map) => {
     console.log('Google Maps API loaded:', window.google);
