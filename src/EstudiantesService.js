@@ -9,8 +9,7 @@ export const addEstudiante = async (nombre, direccionManana, horarioTarde, direc
       nombre,
       direccionManana,
       horarioTarde,
-      direccionTarde,
-      sector // Agrega el campo sector
+      direccionTarde
     });
     console.log('Estudiante agregado correctamente');
   } catch (error) {
