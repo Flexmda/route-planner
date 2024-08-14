@@ -115,15 +115,18 @@ input:checked + .slider:before {
 
 /* Estilos para el botón de menú */
 .menu-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background-color: #333;
-  color: white;
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
   border: none;
-  padding: 10px;
+  border-radius: 4px;
   cursor: pointer;
+}
+
+.menu-button:hover {
+  background-color: #0056b3;
 }
 
 /* Estilos para el contenido principal */
