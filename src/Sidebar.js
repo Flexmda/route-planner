@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './Sidebar.css'; // Asegúrate de tener este archivo para los estilos del sidebar
+import './Sidebar.css'; // Asegúrate de que esta ruta sea correcta
 
-const Sidebar = ({ isOpen, onClose, students }) => {
+const Sidebar = ({ isOpen, onClose, students = [] }) => {
   const [isStudentsOpen, setIsStudentsOpen] = useState(false);
 
   const handleToggleStudents = () => {
@@ -21,11 +21,15 @@ const Sidebar = ({ isOpen, onClose, students }) => {
             Estudiantes {isStudentsOpen ? '▲' : '▼'}
           </button>
           <ul className={`collapsible-content ${isStudentsOpen ? 'show' : ''}`}>
-            {students.map(student => (
-              <li key={student.id}>
-                <Link to={`/student/${student.id}`}>{student.nombre}</Link>
-              </li>
-            ))}
+            {students.length > 0 ? (
+              students.map(student => (
+                <li key={student.id}>
+                  <Link to={`/student/${student.id}`}>{student.nombre}</Link>
+                </li>
+              ))
+            ) : (
+              <li>No hay estudiantes</li>
+            )}
           </ul>
         </li>
       </ul>
